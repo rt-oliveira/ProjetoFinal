@@ -325,5 +325,4 @@ void VisualizacaoMinimo(No* minimo){
 	arqmin.close();
 	system("dot -Tjpg -Gsize=7,7! VisuFibMin.dot -o VisuFibMin.jpg");
 }
-
 #endif
