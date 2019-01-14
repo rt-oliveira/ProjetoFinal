@@ -1,0 +1,266 @@
+inteiro MAX_VAL<-99999999999999999
+inteiro MIN_VAL<--99999999999999999
+
+tipo Nó:
+    inteiro chave
+    inteiro ordem
+    Nó pai
+    Nó filho_esq
+    Nó irmão
+    Nó(inteiro c):
+        chave<-c
+        pai<-nulo
+        filho_esq<-nulo
+        irmão<-nulo
+        ordem<-0
+
+tipo HeapBinomial:
+    Nó cabeça
+    HeapBinomial():
+        cabeça<-nulo
+
+HeapBinomial CriarHeap():
+    retornar HeapBinomial()
+    
+Mínimo(HeapBinomial H, ref Nó noy):
+    Nó y<-nulo
+    Nó x<-H.cabeça
+    inteiro nmin<-MAX_VAL
+    enquanto(x!=nulo):
+        se (x.chave<nmin):
+            nmin<-x.chave
+            y<-x
+        x<-x.irmão
+    noy<-y
+    
+Mínimo(HeapBinomial H,ref Nó noy,ref Nó noprevy):
+    Nó y<-nulo
+    Nó prevy<-nulo
+    Nó x<-H.cabeça
+    Nó prev<-nulo
+    inteiro nmin<-MAX_VAL
+    enquanto(x!=nulo):
+        se (x.chave<nmin):
+            nmin<-x.chave
+            y<-x
+            prevy<-prev
+        prev<-x
+        x<-x.irmão
+    noy<-y
+    noprevy<-prevy
+   
+LiberarHeaps(ref HeapBinomial H1,ref HeapBinomial H2):
+    H1<-nulo
+    H2<-nulo
+
+UnirÁrvoresBinomiais(ref Nó a, ref Nó b):
+    a.pai<-b
+    a.irmão<-b.filho_esq
+    b.filho_esq<-a
+    b.ordem<-b.ordem+1
+    
+Anexar(ref Nó c, ref Nó b,lógico primeiro):
+    se primeiro:
+        c<-b
+        b<-b.irmão
+    senão:
+        c.irmão<-b
+        b<-b.irmão
+    
+Nó Junção(ref HeapBinomial H1,ref HeapBinomial H2):
+    Nó a<-H1.cabeça
+    Nó b<-H2.cabeça
+    Nó c<-nulo
+    lógico primeiro<-verdadeiro
+    Nó d<-c
+    enquanto(a!=nulo ou b!=nulo):
+        se a=nulo:
+            Anexar(c,b,primeiro)
+        senão se b=nulo:
+            Anexar(c,a,primeiro)
+        senão:
+            se a.ordem<b.ordem:
+                Anexar(c,a,primeiro)
+            senão:
+                Anexar(c,b,primeiro)
+        se primeiro:
+            primeiro<-não primeiro
+            d<-c
+        senão:
+            c<-c.irmão
+    retornar d
+    
+HeapBinomial União(ref HeapBinomial H1,ref HeapBinomial H2):
+    HeapBinomial H<-CriarHeap()
+    H.cabeça<-Junção(H1,H2)
+    se H.cabeça=nulo: # Se verdade, é porque não havia nós nos dois heaps
+        LiberarHeaps(H1,H2)
+        retornar H
+    Nó prev<-nulo
+    Nó x<-H.cabeça
+    Nó next<-H.cabeça.irmão
+    enquanto (next!=nulo): # Enquanto ainda não chegou na última raiz
+        se (x.ordem!=next.ordem)ou(next.irmão!=nulo e next.irmão.ordem=x.ordem):
+            prev<-x
+            x<-next
+        senão:
+            se x.chave<=next.chave:
+                x.irmão<-next.irmão
+                UnirÁrvoresBinomiais(next,x)
+            senão:
+                se não prev:
+                    H.cabeça<-next
+                senão:
+                    prev.irmão<-next
+                UnirÁrvoresBinomiais(x,next)
+                x<-next
+        next<-x.irmão
+    LiberarHeaps(H1,H2)
+    retornar H
+
+Nó Inserir(ref HeapBinomial H,inteiro x):
+    HeapBinomial H2<-CriarHeap()
+    Nó n<-Nó(x)
+    H2.cabeça<-n
+    H<-União(H,H2)
+    retornar n
+
+Nó PosiçãoAnterior(HeapBinomial H,Nó x):
+    Nó prev<-nulo
+    Nó atual<-H.cabeça
+    enquanto(atual!=x):
+        prev<-atual
+        atual<-atual.irmão
+    retornar prev
+    
+ReverterIrmãos(ref HeapBinomial H,ref Nó n):
+    Nó prev<-nulo
+    Nó atual<-n
+    Nó prox<-nulo
+    enquanto(atual!=nulo):
+        prox<-atual.irmão
+        atual.irmão<-prev
+        prev<-atual
+        atual<-prox 
+    H.cabeça<-prev
+    
+EliminarPai(ref Nó n):
+    n.pai<-nulo
+    Nó a<-n.irmão
+    enquanto(a!=nulo):
+        a.pai<-nulo
+        a<-a.irmão
+    
+Nó ExtrairMínimo(ref HeapBinomial H):
+    Nó x
+    Nó prev
+    Mínimo(H,x,prev)
+    se prev=nulo:
+        H.cabeça<-x.irmão
+    senão:
+        prev.irmão<-x.irmão
+    HeapBinomial H2<-CriarHeap()
+    EliminarPai(x.filho_esq)
+    ReverterIrmãos(H2,x.filho_esq)
+    H<-União(H,H2)
+    x.filho_esq<-nulo
+    retornar x
+    
+DiminuirChave(ref HeapBinomial H,Nó x,inteiro novo):
+    se(novo>x.chave):
+        escrever("A nova chave é maior que a chave atual do nó")
+        retornar
+    x.chave<-novo
+    Nó y<-x
+    Nó z<-x.pai
+    enquanto(z!=nulo e y.chave<z.chave):
+        inteiro aux<-z.chave
+        z.chave<-y.chave
+        y.chave<-aux
+        y<-z
+        z<-y.pai
+        
+Nó Remover(ref HeapBinomial H,Nó x):
+    DiminuirChave(H,x,MIN_VAL)
+    Nó t<-ExtrairMínimo(H)
+    retornar t
+    
+visual Custom(ref Nó[] t,ref HeapBinomial H):
+    cadeia j
+    cadeia k
+    cadeia retorno<-"digraph { rankdir=TB;"
+    cadeia rankigual<-"{rank=same;"
+    inteiro i
+    para i<-0 até |t|:
+        retorno<-retorno+i+"[label="+t[i].chave+"];"
+    para i<-0 até |t|:
+        se(t[i].filho_esq!=nulo):
+            j<-cadeia(AcharNó(t,t[i]))
+            k<-cadeia(AcharNó(t,t[i].filho_esq))
+            retorno<-retorno+(j+"-> "+ k+"[color=\"blue\"];")
+        se(t[i].pai!=nulo):
+            j<-cadeia(AcharNó(t,t[i]))
+            k<-cadeia(AcharNó(t,t[i].pai))
+            retorno<-retorno+(j+"-> "+ k+"[color=\"red\",constraint=false];")
+        senão:
+            rankigual<-rankigual+" "+i+";"
+        se(t[i].irmão!=nulo):
+            j<-cadeia(AcharNó(t,t[i]))
+            k<-cadeia(AcharNó(t,t[i].irmão))
+            retorno<-retorno+(j+"-> "+ k+"[color=\"darkgreen\"];")
+            retorno<-retorno+"{rank=same; "+j+";"+k+"};"
+    j<-cadeia(AcharNó(t,H.cabeça))
+    retorno<-retorno+("Cabeça->"+j+"[color=\"gold\"];")
+    rankigual<-rankigual+"}"
+    retorno<-retorno+rankigual+"}"
+    retornar dot(retorno)
+
+inteiro AcharNó(Nó[] t,Nó x):
+    inteiro i
+    para i<-0 até |t|:
+        se t[i]=x:
+            retornar i
+
+Nó oculto listadenos[*]<-[]
+visual v1
+Nó temp
+HeapBinomial h1<-CriarHeap()
+temp<-Inserir(h1,21)
+listadenos<-inserir(listadenos,temp)
+temp<-Inserir(h1,7)
+listadenos<-inserir(listadenos,temp)
+temp<-Inserir(h1,18)
+listadenos<-inserir(listadenos,temp)
+temp<-Inserir(h1,4)
+listadenos<-inserir(listadenos,temp)
+temp<-Inserir(h1,17)
+listadenos<-inserir(listadenos,temp)
+v1<-Custom(listadenos,h1)
+Nó no_min
+Mínimo(h1,no_min)
+visual v2<-dot("digraph{ rankdir=LR;\"Nó mínimo\" -> "+no_min.chave+"}")
+HeapBinomial oculto h2<-CriarHeap()
+Nó oculto listadenos2[*]<-[]
+temp<-Inserir(h2,20)
+listadenos2<-inserir(listadenos2,temp)
+temp<-Inserir(h2,19)
+listadenos2<-inserir(listadenos2,temp)
+temp<-Inserir(h2,24)
+listadenos2<-inserir(listadenos2,temp)
+visual v3<-Custom(listadenos2,h2)
+temp<-Inserir(h2,10)
+listadenos2<-inserir(listadenos2,temp)
+v3<-Custom(listadenos2,h2)
+HeapBinomial h3<-União(h1,h2)
+Nó listadenos3[*]<-listadenos+listadenos2
+v3<-Custom(listadenos3,h3)
+temp<-ExtrairMínimo(h3)
+inteiro t<-AcharNó(listadenos3,temp)
+listadenos3<-remover(listadenos3,t)
+v3<-Custom(listadenos3,h3)
+DiminuirChave(h3,listadenos3[4],5)
+v3<-Custom(listadenos3,h3)
+temp<-Remover(h3,listadenos3[5])
+t<-AcharNó(listadenos3,temp)
+listadenos3<-remover(listadenos3,t)
+v3<-Custom(listadenos3,h3)
