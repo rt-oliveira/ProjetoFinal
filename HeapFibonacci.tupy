@@ -1,0 +1,342 @@
+inteiro MAX_VAL<-99999999999999999
+inteiro MIN_VAL<--99999999999999999
+
+tipo Nó:
+    inteiro chave
+    inteiro ordem
+    lógico marcado
+    Nó  pai
+    Nó  filho
+    Nó  esquerda
+    Nó  direita
+    Nó(inteiro c):
+        chave<-c
+        marcado<-falso
+        pai<-nulo
+        filho<-nulo
+        esquerda<-este
+        direita<-este
+        ordem<-0
+
+tipo HeapFibonacci:
+    Nó mínimo
+    Nó primeiro
+    inteiro n
+    HeapFibonacci():
+        mínimo<-nulo
+        primeiro<-nulo
+        n<-0
+
+HeapFibonacci CriarHeap():
+    retornar HeapFibonacci()
+
+AdicionarAntesDoNóMínimo(ref HeapFibonacci H,ref Nó c):
+    Nó minesq<-H.mínimo.esquerda
+    c.direita<-H.mínimo
+    c.esquerda<-minesq
+    minesq.direita<-c
+    H.mínimo.esquerda<-c
+
+Nó Inserir(ref HeapFibonacci H,inteiro d):
+    Nó c<-Nó(d)
+    Nó ret<-Inserir(H,c,verdadeiro)
+    retornar ret
+
+Nó Inserir(ref HeapFibonacci H,ref Nó c,lógico NovoNo):
+    se H.mínimo=nulo: # Caso seja o primeiro nó, ele é o primeiro e o mínimo.
+        H.mínimo<-c
+        H.primeiro<-c
+        c.esquerda<-c
+        c.direita<-c
+    senão: # Caso já tenha algum nó no heap, 
+           # ele é adicionado imediatamente antes do nó mínimo.
+        AdicionarAntesDoNóMínimo(H,c)
+        se H.primeiro=H.mínimo:
+            H.primeiro<-c
+    se c.chave<H.mínimo.chave: # Caso o nó tenha uma chave menor que o
+                               # mínimo, ele se torna o novo mínimo.
+        H.mínimo<-c
+    se NovoNo: # Testa se é um novo nó que está sendo adicionado.
+               # Caso não seja verdade, é porque o nó ou teve sua chave
+               # alterada, e virou raiz, ou então era filho de um nó
+               # que era o mínimo, e ao extraí-lo, os filhos viram raízes.
+        H.n<-H.n+1
+    retornar c
+
+Nó Mínimo(HeapFibonacci H):
+    retornar H.mínimo
+    
+LiberarHeaps(ref HeapFibonacci H1,ref HeapFibonacci H2):
+    H1<-nulo
+    H2<-nulo
+
+HeapFibonacci União(ref HeapFibonacci H1,ref HeapFibonacci H2):
+    HeapFibonacci H<-CriarHeap()
+    H.mínimo<-H1.mínimo
+    H.primeiro<-H1.primeiro
+    se H2.mínimo!=nulo: # Caso falso, é porque H2 é um heap vazio, sem nó.
+        Nó ult1<-H.primeiro.esquerda
+        Nó ult2<-H2.primeiro.esquerda
+        H.primeiro.esquerda<-ult2
+        ult2.direita<-H.primeiro
+        ult1.direita<-H2.primeiro
+        H2.primeiro.esquerda<-ult1
+    se H1.primeiro=nulo:
+        H.primeiro<-H2.primeiro
+    se H1.mínimo=nulo ou (H2.mínimo!=nulo e H2.mínimo.chave<H1.mínimo.chave):
+        # Teste para saber quem será, de fato,
+        # o nó mínimo da união dos dois heaps.
+        H.mínimo<-H2.mínimo
+    H.n<-H1.n+H2.n
+    LiberarHeaps(H1,H2)
+    retornar H
+
+UnirÁrvoreFibonacci(ref HeapFibonacci H,ref Nó filho,ref Nó pai):
+    filho.direita.esquerda<-filho.esquerda
+    filho.esquerda.direita<-filho.direita
+    filho.direita<-nulo
+    filho.esquerda<-nulo
+    se(pai.filho=nulo): 
+        # Caso o filho seja o primeiro filho do pai.
+        pai.filho<-filho
+        filho.pai<-pai
+        filho.esquerda<-filho
+        filho.direita<-filho
+    senão:
+        # Caso o pai já tenha algum filho.
+        Nó t<-pai.filho.direita
+        pai.filho.direita<-filho
+        filho.esquerda<-pai.filho
+        t.esquerda<-filho
+        filho.direita<-t
+        filho.pai<-pai
+    pai.ordem<-pai.ordem+1
+    filho.marcado<-falso
+    
+Nó PróximaRaiz(ref Nó w):
+    enquanto(w.pai!=nulo): # O nó pode não ser mais uma raiz, e como itera
+                           # sobre as raízes, precisa retornar ao nó raiz.
+        w<-w.pai
+    w<-w.direita
+    retornar w
+    
+Nó DeterminarNovoNóPrimeiro(ref Nó auxw):
+    enquanto(auxw.pai!=nulo): # Loop para saber quem é a primeira raiz do heap,
+                              # para poder se tornar o H.primeiro.
+        auxw<-auxw.pai
+    retornar auxw
+
+FazerUniãoÁrvoresFibonacci(ref Nó[] A,ref Nó x,ref inteiro d):
+    enquanto(A[d]!=nulo): # Enquanto ele for a 2a ocorrência de nó
+                              # com aquela ordem já registrada, une com 
+                              # o nó que já foi visto com aquela ordem.
+        Nó y<-A[d]
+        se x.chave>y.chave:
+            Nó aux<-x
+            x<-y
+            y<-aux
+        UnirÁrvoreFibonacci(H,y,x)
+        A[d]<-nulo
+        d<-d+1
+    A[d]<-x
+
+Consolidar(ref HeapFibonacci H):
+    inteiro p<-inteiro(log(H.n,2))+1
+    Nó A[p]
+    inteiro i
+    inteiro d
+    Nó w<-H.primeiro
+    Nó último<-H.primeiro.esquerda
+    lógico continua<-verdadeiro
+    Nó auxw<-H.primeiro
+    enquanto(continua): # Enquanto ainda não chegou no último nó
+        se w=último:
+            continua<-falso # Quando chega no último nó da lista de raízes,
+                            # para de rodar o laço enquanto.
+        Nó x<-w
+        inteiro d<-w.ordem
+        FazerUniãoÁrvoresFibonacci(A,x,d) # Esta função tentará fazer
+                                              # a união de árvores que estão
+                                              # no heap de Fibonacci
+        w<-PróximaRaiz(w)
+    H.primeiro<-DeterminarNovoNóPrimeiro(auxw)
+    H.mínimo<-nulo
+    para i<-0..p: # Loop para testar as raízes resultantes, e saber quem é
+                  # a menor delas.
+        se A[i]!=nulo:
+            se H.mínimo=nulo ou A[i].chave<H.mínimo.chave:
+                H.mínimo<-A[i]
+                
+AdicionarFilhosAListaDeRaízes(ref HeapFibonacci H,ref Nó f):
+    Nó fd<-f.direita
+    inteiro i
+    para i<-1 até k inclusive passo 1: # Insere na lista de raízes
+                                       # cada filho do nó mínimo.
+        Inserir(H,f,falso)
+        f.pai<-nulo
+        f<-fd
+        fd<-f.direita
+                   
+Nó ExtrairMínimo(ref HeapFibonacci H):
+    Nó z<-H.mínimo
+    inteiro k<-z.ordem
+    se z!=nulo: # Se a árvore tem algum nó.
+        Nó f<-z.filho
+        se f!=nulo: # É porque ele tem alguma quantidade de filhos,
+                    # no mínimo 1.
+            AdicionarFilhosAListaDeRaízes(H,f)
+        z.esquerda.direita<-z.direita
+        z.direita.esquerda<-z.esquerda
+        z.esquerda<-nulo
+        se H.n=1: 
+            H.mínimo<-nulo
+            H.primeiro<-nulo
+        senão:                      # Há mais de uma raiz no heap.
+            H.mínimo<-z.direita
+            se z=H.primeiro:
+                H.primeiro<-z.direita
+            Consolidar(H)
+        z.direita<-nulo
+        H.n<-H.n-1
+    retornar z
+
+Cortar(ref HeapFibonacci H,ref Nó filho,ref Nó pai):
+    Nó filho_esq<-filho.esquerda
+    Nó filho_dir<-filho.direita
+    se filho=filho_esq: # Se for filho único.
+        pai.filho<-nulo
+    senão: # Tem mais filhos, além do que foi removido.
+        filho_esq.direita<-filho_dir
+        filho_dir.esquerda<-filho_esq
+        pai.filho<-filho_dir
+    pai.ordem<-pai.ordem-1
+    filho.pai<-nulo
+    filho.marcado<-falso
+    Inserir(H,filho,falso)
+
+CorteCascata(ref HeapFibonacci H,ref Nó filho):
+    Nó pai<-filho.pai
+    se pai!=nulo: # Nó raiz sempre fica com marcado = falso.
+        se (não filho.marcado): # É o primeiro filho que o nó perde,
+                                # caso verdade.
+            filho.marcado<-verdadeiro
+        senão: # Caso verdade, já perdeu 2 filhos, e o nó tem que se tornar
+               # raiz, fazendo com que seu pai perca um filho, e isso pode
+               # ser recursivo, pois o pai pode perder seu 2o filho, e assim
+               # segue.
+            Cortar(H,filho,pai)
+            CorteCascata(H,pai)
+
+DiminuirChave(ref HeapFibonacci H,Nó x,inteiro novo):
+    se(novo>x.chave):
+        escrever("A nova chave é maior que a chave atual do nó")
+        retornar
+    x.chave<-novo
+    Nó y<-x.pai
+    se y!=nulo e x.chave<y.chave: # Se o nó não é raiz,
+                                  # e tem chave menor que a de seu pai,
+                                  # ele acaba virando ao diminuir sua chave.
+        Cortar(H,x,y)
+        CorteCascata(H,y)
+    se x.chave<H.mínimo.chave: # Se a chave nova for menor que a mínima, o nó
+                               # se torna o nó mínimo.
+        H.mínimo<-x
+
+Nó Remover(ref HeapFibonacci H,ref Nó n):
+    DiminuirChave(H,n,MIN_VAL)
+    Nó t<-ExtrairMínimo(H)
+    retornar t
+
+inteiro AcharNó(Nó[] t,Nó x):
+    inteiro i
+    para i<-0 até |t|:
+        se t[i]=x:
+            retornar i
+
+visual Custom(ref Nó[] t,ref HeapFibonacci H):
+    cadeia  j
+    cadeia  k
+    cadeia  retorno<-"digraph { rankdir=TB;"
+    cadeia  rankigual<-"{rank=same;"
+    inteiro i
+    para i<-0 até |t|:
+        se(t[i].marcado):
+            retorno<-retorno+i+"[label="+t[i].chave+",style=filled,fillcolor=\"cyan\"];"
+        senão:
+            retorno<-retorno+i+"[label="+t[i].chave+"];"
+    para i<-0 até |t|:
+        j<-cadeia(AcharNó(t,t[i]))
+        k<-cadeia(AcharNó(t,t[i].direita))
+        retorno<-retorno+(j+"-> "+ k+"[color=\"blue\"];")
+        retorno<-retorno+"{rank=same; "+j+";"+k+"};"
+        j<-cadeia(AcharNó(t,t[i]))
+        k<-cadeia(AcharNó(t,t[i].esquerda))
+        retorno<-retorno+(j+"-> "+ k+"[color=\"red\"];")
+        retorno<-retorno+"{rank=same; "+j+";"+k+"};"
+        se(t[i].pai!=nulo):
+            j<-cadeia(AcharNó(t,t[i]))
+            k<-cadeia(AcharNó(t,t[i].pai))
+            retorno<-retorno+(j+"-> "+ k+"[color=\"orange\",constraint=false];")
+        senão:
+            rankigual<-rankigual+" "+i+";"
+        se(t[i].filho!=nulo):
+            j<-cadeia(AcharNó(t,t[i]))
+            k<-cadeia(AcharNó(t,t[i].filho))
+            retorno<-retorno+(j+"-> "+ k+"[color=\"green\"];")
+    j<-cadeia(AcharNó(t,H.mínimo))
+    retorno<-retorno+("Mínimo->"+j+"[color=\"turquoise4\"];")
+    j<-cadeia(AcharNó(t,H.primeiro))
+    retorno<-retorno+("Primeiro->"+j+"[color=\"gold\"];")
+    rankigual<-rankigual+"}"
+    retorno<-retorno+rankigual+"}"
+    retornar dot(retorno)
+
+visual  v1
+Nó temp
+Nó  listadenos1[*]<-[]
+Nó  listadenos2[*]<-[]
+HeapFibonacci  h1<-CriarHeap()
+HeapFibonacci  h2<-CriarHeap()
+Nó listadenos3[*]<-[]
+HeapFibonacci h3<-União(h1,h2)
+h1<-CriarHeap()
+temp<-Inserir(h1,13)
+listadenos1<-inserir(listadenos1,temp)
+temp<-Inserir(h1,10)
+listadenos1<-inserir(listadenos1,temp)
+temp<-Inserir(h1,8)
+listadenos1<-inserir(listadenos1,temp)
+temp<-Inserir(h1,17)
+listadenos1<-inserir(listadenos1,temp)
+temp<-Inserir(h1,12)
+listadenos1<-inserir(listadenos1,temp)
+v1<-Custom(listadenos1,h1)
+Nó no_min<-Mínimo(h1)
+visual  v2<-dot("digraph{ rankdir=LR;\"Nó mínimo\" -> "+no_min.chave+"}")
+temp<-Inserir(h3,8)
+listadenos3<-inserir(listadenos3,temp)
+temp<-Inserir(h3,24)
+listadenos3<-inserir(listadenos3,temp)
+temp<-Inserir(h3,17)
+listadenos3<-inserir(listadenos3,temp)
+temp<-Inserir(h3,22)
+listadenos3<-inserir(listadenos3,temp)
+visual v3<-Custom(listadenos3,h3)
+temp<-Inserir(h3,21)
+listadenos3<-inserir(listadenos3,temp)
+v3<-Custom(listadenos3,h3)
+h3<-União(h1,h3)
+listadenos3<-listadenos1+listadenos3
+v3<-Custom(listadenos3,h3)
+temp<-ExtrairMínimo(h3)
+inteiro j<-AcharNó(listadenos3,temp)
+listadenos3<-remover(listadenos3,j)
+v3<-Custom(listadenos3,h3)
+DiminuirChave(h3,listadenos3[2],12)
+v3<-Custom(listadenos3,h3)
+DiminuirChave(h3,listadenos3[8],9)
+v3<-Custom(listadenos3,h3)
+temp<-Remover(h3,listadenos3[1])
+j<-AcharNó(listadenos3,temp)
+listadenos3<-remover(listadenos3,j)
+v3<-Custom(listadenos3,h3)
