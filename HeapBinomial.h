@@ -16,7 +16,7 @@ typedef struct No{
 	struct No* pai;
 	struct No* filho_esq;
 	struct No* irmao;
-	No(int c){
+	No(long long int c){
 		chave=c;
 		pai=NULL;
 		filho_esq=NULL;
@@ -128,7 +128,7 @@ HeapBinomial Uniao(HeapBinomial& H1,HeapBinomial& H2){
     return H;
 }
 
-No* Inserir(HeapBinomial& H,int x){
+No* Inserir(HeapBinomial& H,long long int x){
     HeapBinomial H2=CriarHeap();
     No* n=new No(x);
     H2.cabeca=n;
