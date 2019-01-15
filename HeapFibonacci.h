@@ -18,7 +18,7 @@ typedef struct No{
 	struct No* filho;
 	struct No* esquerda;
 	struct No* direita;
-	No(int c){
+	No(long long int c){
 		chave=c;
 		marcado=false;
 		pai=NULL;
@@ -72,7 +72,7 @@ No* Inserir(HeapFibonacci& H,No*& c,bool NovoNo){
     return c;
 }
 
-No* Inserir(HeapFibonacci& H,int d){
+No* Inserir(HeapFibonacci& H,long long int d){
     No* c=new No(d);
     No* ret=Inserir(H,c,true);
     return ret;
