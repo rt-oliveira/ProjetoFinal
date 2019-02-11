@@ -21,8 +21,8 @@ tipo HeapBinomial:
 
 HeapBinomial CriarHeap():
     retornar HeapBinomial()
-    
-Mínimo(HeapBinomial H, ref Nó noy):
+
+Nó Mínimo(HeapBinomial H):
     Nó y<-nulo
     Nó x<-H.cabeça
     inteiro nmin<-MAX_VAL
@@ -31,23 +31,7 @@ Mínimo(HeapBinomial H, ref Nó noy):
             nmin<-x.chave
             y<-x
         x<-x.irmão
-    noy<-y
-    
-Mínimo(HeapBinomial H,ref Nó noy,ref Nó noprevy):
-    Nó y<-nulo
-    Nó prevy<-nulo
-    Nó x<-H.cabeça
-    Nó prev<-nulo
-    inteiro nmin<-MAX_VAL
-    enquanto(x!=nulo):
-        se (x.chave<nmin):
-            nmin<-x.chave
-            y<-x
-            prevy<-prev
-        prev<-x
-        x<-x.irmão
-    noy<-y
-    noprevy<-prevy
+    retornar y
    
 LiberarHeaps(ref HeapBinomial H1,ref HeapBinomial H2):
     H1<-nulo
@@ -152,9 +136,8 @@ EliminarPai(ref Nó n):
         a<-a.irmão
     
 Nó ExtrairMínimo(ref HeapBinomial H):
-    Nó x
-    Nó prev
-    Mínimo(H,x,prev)
+    Nó x<-Mínimo(H)
+    Nó prev<-PosiçãoAnterior(H,x)
     se prev=nulo:
         H.cabeça<-x.irmão
     senão:
@@ -236,8 +219,7 @@ listadenos<-inserir(listadenos,temp)
 temp<-Inserir(h1,17)
 listadenos<-inserir(listadenos,temp)
 v1<-Custom(listadenos,h1)
-Nó no_min
-Mínimo(h1,no_min)
+Nó no_min<-Mínimo(h1)
 visual v2<-dot("digraph{ rankdir=LR;\"Nó mínimo\" -> "+no_min.chave+"}")
 HeapBinomial oculto h2<-CriarHeap()
 Nó oculto listadenos2[*]<-[]
